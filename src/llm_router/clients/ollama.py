@@ -46,3 +46,37 @@ class OllamaClient(BaseClient):
             return self._stream_request("POST", "/api/chat", data)
         else:
             return await self._make_request("POST", "/api/chat", data)
+
+    async def chat_completion(
+        self, data: Dict[str, Any], stream: bool = False
+    ) -> httpx.Response | AsyncIterator[bytes]:
+        """Create chat completion (OpenAI-compatible wrapper).
+
+        This method wraps the Ollama chat endpoint to provide an OpenAI-compatible
+        interface for the router.
+
+        Args:
+            data: Request data (OpenAI format)
+            stream: Whether to stream response
+
+        Returns:
+            Response or async iterator of chunks
+        """
+        return await self.chat(data, stream)
+
+    async def completion(
+        self, data: Dict[str, Any], stream: bool = False
+    ) -> httpx.Response | AsyncIterator[bytes]:
+        """Create text completion (OpenAI-compatible wrapper).
+
+        This method wraps the Ollama generate endpoint to provide an OpenAI-compatible
+        interface for the router.
+
+        Args:
+            data: Request data (OpenAI format)
+            stream: Whether to stream response
+
+        Returns:
+            Response or async iterator of chunks
+        """
+        return await self.generate(data, stream)

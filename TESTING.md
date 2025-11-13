@@ -113,11 +113,13 @@ header_rules:
 ✅ Health check endpoint works
 ✅ Multiple models configured
 ✅ Model aliasing support
+✅ Model aliasing with Ollama (OpenAI → Ollama routing)
 ✅ Regex header dropping
 ✅ Configuration loading
 ✅ Logging with API key masking
 ✅ OpenAI-compatible endpoints
 ✅ Anthropic-compatible endpoints
+✅ OllamaClient OpenAI-compatible interface
 
 ## Next Steps
 
