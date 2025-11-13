@@ -1,0 +1,26 @@
+[project]
+name = "llm-proxy-py"
+version = "0.1.0"
+description = "LLM Router Service - Unified interface for multiple LLM providers"
+readme = "README.md"
+authors = [
+    { name = "K", email = "martsinkevich@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.109.0",
+    "uvicorn>=0.27.0",
+    "httpx>=0.26.0",
+    "pydantic>=2.5.0",
+    "pydantic-settings>=2.1.0",
+    "pyyaml>=6.0",
+    "jsonpath-ng>=1.6.0",
+    "python-multipart>=0.0.6",
+]
+
+[project.scripts]
+llm-router = "llm_router.main:cli"
+
+[build-system]
+requires = ["uv_build>=0.9.5,<0.10.0"]
+build-backend = "uv_build"

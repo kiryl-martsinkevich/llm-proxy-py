@@ -1,0 +1,142 @@
+# LLM Router Service Configuration Example
+
+# Server configuration
+server:
+  host: "0.0.0.0"
+  port: 8000
+  log_requests: true        # Log full requests including headers
+  log_responses: true       # Log full responses including headers
+  mask_api_keys: true       # Mask API keys in logs
+
+# Model configurations
+# Each model maps to a specific provider endpoint
+models:
+  # OpenAI GPT-4
+  gpt-4:
+    provider: openai
+    endpoint: "https://api.openai.com/v1"
+    api_key: "sk-your-openai-key-here"
+    timeout: 60.0
+    connect_timeout: 10.0
+    ssl_verify: true
+    retry_config:
+      max_retries: 3
+      retry_status_codes: [429, 500, 502, 503, 504]
+      backoff_factor: 2.0
+      initial_delay: 1.0
+      max_delay: 60.0
+
+  # OpenAI GPT-3.5
+  gpt-3.5-turbo:
+    provider: openai
+    endpoint: "https://api.openai.com/v1"
+    api_key: "sk-your-openai-key-here"
+    timeout: 60.0
+    connect_timeout: 10.0
+    ssl_verify: true
+
+  # Anthropic Claude
+  claude-3-opus:
+    provider: anthropic
+    endpoint: "https://api.anthropic.com"
+    api_key: "sk-ant-your-anthropic-key-here"
+    timeout: 120.0
+    connect_timeout: 10.0
+    ssl_verify: true
+    retry_config:
+      max_retries: 2
+      retry_status_codes: [429, 500, 502, 503]
+
+  claude-3-sonnet:
+    provider: anthropic
+    endpoint: "https://api.anthropic.com"
+    api_key: "sk-ant-your-anthropic-key-here"
+    timeout: 60.0
+    ssl_verify: true
+
+  # Local Ollama instance
+  llama3:
+    provider: ollama
+    endpoint: "http://localhost:11434"
+    timeout: 120.0
+    connect_timeout: 5.0
+    ssl_verify: false  # Local instance, no SSL
+
+  # Custom OpenAI-compatible endpoint
+  custom-model:
+    provider: openai
+    endpoint: "https://your-custom-endpoint.com/v1"
+    api_key: "your-custom-api-key"
+    timeout: 60.0
+    ssl_verify: true
+
+# Default retry configuration (used if model doesn't specify one)
+default_retry_config:
+  max_retries: 3
+  retry_status_codes: [429, 500, 502, 503, 504]
+  backoff_factor: 2.0
+  initial_delay: 1.0
+  max_delay: 60.0
+
+# Header manipulation rules
+header_rules:
+  # Drop all incoming headers and only use configured ones
+  drop_all: false
+
+  # Specific headers to drop from incoming requests
+  drop_headers:
+    - "x-forwarded-for"
+    - "x-real-ip"
+    - "forwarded"
+
+  # Headers to add if they don't exist
+  add_headers:
+    user-agent: "LLM-Router/1.0"
+    accept: "application/json"
+
+  # Headers to force (override if exists, add if not)
+  force_headers:
+    content-type: "application/json"
+
+# Content transformations
+# Applied in order to request data before sending to upstream
+transformations:
+  # Example: Remove system prompts from messages
+  - name: "remove_system_prompts"
+    type: "jsonpath_drop"
+    enabled: false  # Disabled by default
+    path: "$.messages[?(@.role='system')]"
+
+  # Example: Sanitize email addresses in content
+  - name: "sanitize_emails"
+    type: "regex_replace"
+    enabled: false  # Disabled by default
+    pattern: '\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b'
+    replacement: "[EMAIL_REDACTED]"
+    flags: "IGNORECASE"
+
+  # Example: Add a custom field to requests
+  - name: "add_metadata"
+    type: "jsonpath_add"
+    enabled: false  # Disabled by default
+    path: "$.metadata"
+    value:
+      source: "llm-router"
+      version: "1.0"
+
+  # Example: Remove specific content patterns
+  - name: "remove_sensitive_terms"
+    type: "regex_replace"
+    enabled: false
+    pattern: "(password|secret|token):\s*\S+"
+    replacement: "[REDACTED]"
+    flags: "IGNORECASE"
+
+# Environment variable overrides:
+# - LLM_ROUTER_MODEL_{MODEL_NAME}_API_KEY: Override API key for specific model
+# - LLM_ROUTER_SERVER_PORT: Override server port
+# - LLM_ROUTER_SERVER_HOST: Override server host
+#
+# Example:
+# export LLM_ROUTER_MODEL_GPT_4_API_KEY="sk-new-key"
+# export LLM_ROUTER_SERVER_PORT=9000
