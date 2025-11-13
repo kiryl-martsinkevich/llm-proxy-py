@@ -149,7 +149,7 @@ transformations:
   - name: "remove_sensitive_terms"
     type: "regex_replace"
     enabled: false
-    pattern: "(password|secret|token):\s*\S+"
+    pattern: '(password|secret|token):\s*\S+'
     replacement: "[REDACTED]"
     flags: "IGNORECASE"
 
