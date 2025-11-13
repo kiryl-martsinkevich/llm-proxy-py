@@ -463,4 +463,7 @@ For issues and questions, please open an issue on GitHub.
 
 - [CLAUDE.md](CLAUDE.md) - Architecture and design documentation
 - [PLAN.md](PLAN.md) - Implementation plan and roadmap
+- [TESTING.md](TESTING.md) - Testing guide with examples
 - [config.example.yaml](config.example.yaml) - Configuration reference
+- [config.claude-code-ollama.yaml](config.claude-code-ollama.yaml) - Claude Code with local Ollama setup
+- [CLAUDE-CODE-SETUP.md](CLAUDE-CODE-SETUP.md) - Guide for using Claude Code with local models
