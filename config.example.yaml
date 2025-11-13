@@ -70,6 +70,24 @@ models:
     timeout: 60.0
     ssl_verify: true
 
+  # Model aliasing example: route "gpt-4" requests to Ollama
+  # Client requests with model "gpt-4" will be routed to Ollama
+  # but the actual model name sent will be "llama3"
+  gpt-4-local:
+    provider: ollama
+    endpoint: "http://localhost:11434"
+    actual_model_name: "llama3"  # Override model name sent to provider
+    timeout: 120.0
+    ssl_verify: false
+
+  # Another aliasing example: route to a different OpenAI model
+  gpt-4-alias:
+    provider: openai
+    endpoint: "https://api.openai.com/v1"
+    api_key: "sk-your-openai-key-here"
+    actual_model_name: "gpt-3.5-turbo"  # Actually use gpt-3.5-turbo
+    timeout: 60.0
+
 # Default retry configuration (used if model doesn't specify one)
 default_retry_config:
   max_retries: 3
@@ -84,10 +102,13 @@ header_rules:
   drop_all: false
 
   # Specific headers to drop from incoming requests
+  # Supports both exact matches and regex patterns
   drop_headers:
-    - "x-forwarded-for"
-    - "x-real-ip"
-    - "forwarded"
+    - "x-forwarded-for"      # Exact match
+    - "x-real-ip"            # Exact match
+    - "forwarded"            # Exact match
+    - "^x-.*"                # Regex: drop all headers starting with "x-"
+    - ".*-token$"            # Regex: drop all headers ending with "-token"
 
   # Headers to add if they don't exist
   add_headers:

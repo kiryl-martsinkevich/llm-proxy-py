@@ -40,6 +40,11 @@ class ModelConfig(BaseModel):
     retry_config: Optional[RetryConfig] = Field(
         default=None, description="Retry configuration"
     )
+    # Model name to send to the actual provider (if different from the key)
+    actual_model_name: Optional[str] = Field(
+        default=None,
+        description="Actual model name to send to provider (overrides incoming model name)",
+    )
 
 
 class HeaderRuleConfig(BaseModel):
@@ -50,7 +55,8 @@ class HeaderRuleConfig(BaseModel):
         description="Drop all incoming headers and only use configured ones",
     )
     drop_headers: List[str] = Field(
-        default_factory=list, description="Headers to drop from requests"
+        default_factory=list,
+        description="Headers to drop from requests (supports regex patterns)",
     )
     add_headers: Dict[str, str] = Field(
         default_factory=dict, description="Headers to add to requests"

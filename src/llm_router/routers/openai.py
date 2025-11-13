@@ -92,6 +92,13 @@ async def chat_completions(
         # Convert request to dict
         data = req_data.model_dump(exclude_none=True)
 
+        # Get model config to check for actual_model_name override
+        app_config = request.app.state.config
+        model_config = app_config.get_model_config(req_data.model)
+        if model_config and model_config.actual_model_name:
+            # Override the model name in the request
+            data["model"] = model_config.actual_model_name
+
         if req_data.stream:
             # Streaming response
             response_iter = await client.chat_completion(data, stream=True)
@@ -151,6 +158,13 @@ async def completions(
 
         # Convert request to dict
         data = req_data.model_dump(exclude_none=True)
+
+        # Get model config to check for actual_model_name override
+        app_config = request.app.state.config
+        model_config = app_config.get_model_config(req_data.model)
+        if model_config and model_config.actual_model_name:
+            # Override the model name in the request
+            data["model"] = model_config.actual_model_name
 
         if req_data.stream:
             # Streaming response

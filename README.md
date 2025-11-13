@@ -5,10 +5,11 @@ A Python-based LLM router service that provides a unified interface for multiple
 ## Features
 
 - **Multiple Provider Support**: OpenAI, Anthropic, and Ollama endpoints
+- **Model Aliasing**: Route requests for one model to a different provider/model
 - **OpenAI-Compatible API**: Exposes `/v1/chat/completions` and `/v1/completions` endpoints
 - **Anthropic-Compatible API**: Exposes `/v1/messages` endpoint
 - **Streaming Support**: Full streaming support for all providers
-- **Header Manipulation**: Drop, add, or force HTTP headers
+- **Header Manipulation**: Drop (with regex support), add, or force HTTP headers
 - **Request/Response Logging**: Optional full logging with sensitive data masking
 - **Content Transformation**: Regex-based and JSON path operations
 - **Retry Logic**: Configurable retry with exponential backoff
@@ -118,6 +119,7 @@ models:
     timeout: 60.0           # Request timeout (seconds)
     connect_timeout: 10.0   # Connection timeout (seconds)
     ssl_verify: true        # Verify SSL certificates
+    actual_model_name: "real-model"  # Optional: override model name sent to provider
     retry_config:           # Optional retry configuration
       max_retries: 3
       retry_status_codes: [429, 500, 502, 503, 504]
@@ -126,13 +128,38 @@ models:
       max_delay: 60.0
 ```
 
+#### Model Aliasing
+
+You can route requests for one model name to a different provider/model using `actual_model_name`:
+
+```yaml
+models:
+  # Client requests "gpt-4" but actually uses local Ollama
+  gpt-4:
+    provider: ollama
+    endpoint: "http://localhost:11434"
+    actual_model_name: "llama3"  # Send "llama3" to Ollama
+    ssl_verify: false
+
+  # Client requests "gpt-4-cheap" but uses gpt-3.5-turbo
+  gpt-4-cheap:
+    provider: openai
+    endpoint: "https://api.openai.com/v1"
+    api_key: "sk-your-key"
+    actual_model_name: "gpt-3.5-turbo"
+```
+
 ### Header Manipulation
+
+Headers can be dropped, added, or forced. Drop rules support both exact matches and regex patterns:
 
 ```yaml
 header_rules:
   drop_all: false           # Drop all headers, use only configured
-  drop_headers:             # Headers to drop
-    - "x-forwarded-for"
+  drop_headers:             # Headers to drop (supports regex)
+    - "x-forwarded-for"     # Exact match
+    - "^x-.*"               # Regex: all headers starting with "x-"
+    - ".*-token$"           # Regex: all headers ending with "-token"
   add_headers:              # Headers to add if not exist
     user-agent: "LLM-Router/1.0"
   force_headers:            # Headers to force (override)
